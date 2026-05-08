@@ -1,66 +1,41 @@
-# Parallel K Means
-A parallel implementation of K-Means algorithm in C++ and OpenMP.
+# KMeans Multi-Version Benchmark
 
-<p align="center">
-<img  src="https://i.imgur.com/THQHtmv.png" width="90%" height="90%"/>
-</p>
+This project benchmarks four different implementations of the K-Means clustering algorithm: Sequential, Parallel (OpenMP), Optimized (SoA), and GPU-Accelerated (OpenCL).
 
-The task of k-means is to divide points within a space in K groups based on their characteristics. It is based on few steps:
-1. generate N points;
-2. generate K centroids that represent K clusters;
-3. for each point, compute the distance between the point and all of the clusters and assign the point
-to the nearest cluster;
-4. update the centroid’s characteristics, specially its coordinates, based on the new points inside the
-cluster;
-5. repeat from 3 until reaching a maximum number of iterations or until the clusters won’t move.
+## How to Run on Google Colab
 
-## Implementation
-The implementation covres both sequential and parallel version, in **C++** and **OpenMP**.
+To get the most accurate results for the OpenCL version, follow these steps to enable the GPU:
 
-#### Sequential version
-Two classes are defined:
-* Point.h
-  * 2D points chosen randomly;
-  * ```x_coord```, ```y_coord```, ```cluster_id```;
-  * ```setter()``` and ```getter()``` methods.
-* Cluster.h
-  * 2D points chosen randomly at first;
-  * ```x_coord```, ```y_coord```, ```size```, ```new_x_coord```, ```new_y_coord```;
-  * ```setter()``` and ```getter()``` methods and others to update the coordinates of the centroids.
-  
-The file ```main_sequential``` starts the sequential version:
-* in this program, points and clusters are 2D points chosen randomly;
-* the first functions initialize clusters and points;
-* after that, there is a while loop where are the 2 most important functions:
-  * ```compute_distance()```; 
-  * ```update_clusters()```;
-  
-#### Parallel version
-The program is mostly parallelizable in the ```compute_distance()``` function and we can parallelize the outer for.
-OpenMP was choosen in order to parallelize the computing:
+### 1. Enable T4 GPU
+1.  Open your Colab notebook.
+2.  Go to the top menu: **Edit** -> **Notebook settings** (or **Runtime** -> **Change runtime type**).
+3.  Under **Hardware accelerator**, select **T4 GPU**.
+4.  Click **Save**.
 
-* **Private variables** for each thread: ```min_distance``` and ```min_index```;
-* **Firstprivate variables** for each thread: ```points_size``` and ```clusters_size```;
-* **Shared variable**: vector of points and vector of clusters;
-* since the amount for computation is equal for each thread, it was chosen a **static scheduling**.
+### 2. Execution Commands
+Upload the project files to your Colab session storage and run the following cells:
 
-## Experiments and results
-Here is a table that shows the speedup analysis:
-<p align="center">
-<img  src="https://i.imgur.com/V5aqr5q.png" width="100%" height="100%"/>
-</p>
+```bash
+# 1. Give execution permission to the script
+!chmod +x run_benchmark.sh
 
-Here an example of the execution of the program plotted with Gnuplot:
-<p align="center">
-<img  src="https://i.imgur.com/gxbj2hf.png" width="50%" height="50%"/>
-</p>
+# 2. Run the full benchmark (this may take a few minutes)
+!./run_benchmark.sh
 
-## Reports
-A copy of the report (italian) can be found 
-<a href="https://github.com/SestoAle/Parallel-K-Means/raw/master/report/report.pdf" download="report.pdf">here</a>.
+# 3. View the final performance report
+!cat benchmark_report.txt
+```
 
-A copy of the presentation can be found
-<a href="https://github.com/SestoAle/Parallel-K-Means/raw/master/report/presentation.pdf" download="presentation.pdf">here</a>.
+## 📊 Benchmark Versions
+- **Seq**: Basic single-threaded C++ implementation.
+- **Par**: Multi-threaded version using OpenMP.
+- **Opt**: Performance-optimized version using Structure of Arrays (SoA) and local accumulation.
+- **OCL**: High-performance GPU version using OpenCL (optimized for zero-copy iterations).
 
-## License
-Licensed under the term of [MIT License](https://github.com/SestoAle/Parallel-K-Means/blob/master/LICENSE).
+## 🛠 Project Structure
+- `main_sequential.cpp`: Sequential implementation.
+- `main_parallel.cpp`: OpenMP parallel implementation.
+- `main_optimized.cpp`: Memory-efficient SoA implementation.
+- `main_opencl.cpp`: OpenCL host code (handles GPU orchestration).
+- `kmeans_gpu.cl`: OpenCL kernels (Distance calculation & Centroid updates).
+- `run_benchmark.sh`: Automated test suite and report generator.
